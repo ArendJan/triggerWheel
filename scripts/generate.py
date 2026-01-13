@@ -67,7 +67,7 @@ def exportSTEP(body, name, build_path):
     
     
 def exportDXF(body, name, build_path):   
-    sv0 = Draft.make_shape2dview(body, FreeCAD.Vector(0, -1, 0))
+    sv0 = Draft.make_shape2dview(body, FreeCAD.Vector(0, 0, 1))
     FreeCAD.getDocument(name).recompute()    
     pathOut = getFilePath(body, name, build_path, "dxf")
     
@@ -83,13 +83,39 @@ def exportDXF(body, name, build_path):
 
     del __objs__
     
+tooth_count_spreadsheet_cell = "E2"
+missing_count_spreadsheet_cell = "F2"
     
 def renderFile(freecadFile):
     doc = FreeCAD.open(str(freecadFile))
+    SPREADSHEET_NAME = "Spreadsheet"
+    try:
+        sheet = doc.getObject(SPREADSHEET_NAME)
+        if not sheet or sheet.TypeId != 'Spreadsheet::Sheet':
+            raise AttributeError
+    except AttributeError:
+        print(f"Spreadsheet {SPREADSHEET_NAME} not found in {freecadFile.stem}")
+        pass
+    try:
+        tooth_count_file = freecadFile.parent / "TOOTH_COUNT.txt"
+        if tooth_count_file.exists():
+            with open(tooth_count_file, 'r') as f:
+                tooth_count = f.read().strip()
+                sheet.set(tooth_count_spreadsheet_cell, tooth_count)
+        
+        missing_count_file = freecadFile.parent / "MISSING_COUNT.txt"
+        if missing_count_file.exists():
+            with open(missing_count_file, 'r') as f:
+                missing_count = f.read().strip()
+                sheet.set(missing_count_spreadsheet_cell, missing_count)
+    except Exception as e:
+        print(f"Error setting spreadsheet value: {e}")
+    doc.recompute()
     bodies = list()
     for obj in doc.Objects:
+        print(f"Found object: {obj.Name} of type {obj.TypeId}")
         # Fix for motor clamp lock, the chamfer one is the final one
-        if obj.isDerivedFrom("PartDesign::Body") or obj.isDerivedFrom("Part::Chamfer"):
+        if obj.isDerivedFrom("PartDesign::Body") or obj.isDerivedFrom("Part::Chamfer") or obj.isDerivedFrom("Part::Fillet") or obj.Name.startswith("Array"):
             bodies.append(obj)
     for body in bodies:
         build_dir = (freecadFile.parent / "../build").resolve()
@@ -122,4 +148,5 @@ for filename in os.listdir(freecad_directory):
     f = freecad_directory / filename
     if f.suffix == ".FCStd":
         print(f.stem)
+
         renderFile(f)
