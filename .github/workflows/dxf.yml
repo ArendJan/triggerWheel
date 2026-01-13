@@ -1,0 +1,57 @@
+name: Export files
+
+on:
+  [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: install freecad
+        run: |
+          sudo add-apt-repository ppa:freecad-maintainers/freecad-stable -y
+          sudo apt-get update
+          sudo apt-get install freecad -y
+    
+      - name: Run FreeCAD
+        run: |
+            mkdir /tmp/mirte-frame
+            cp -r ./ /tmp/mirte-frame
+            cp -r ./scripts /tmp/mirte-frame
+            # cp ./bill_of_materials.md /tmp/mirte-frame
+            cd /tmp/mirte-frame/scripts
+            echo "exec(open(\"/tmp/mirte-frame/scripts/generate.py\").read())" | freecadcmd
+      - name: Upload DXF
+        uses: actions/upload-artifact@v4
+        with:
+          name: dxfs
+          path: /tmp/build/dxf/*
+      - name: Upload STL
+        uses: actions/upload-artifact@v4
+        with:
+          name: stls
+          path: /tmp/build/stl/*
+      - name: Upload STEP
+        uses: actions/upload-artifact@v4
+        with:
+          name: steps
+          path: /tmp/build/step/*
+      - name: zip files
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          cd /tmp/build
+          zip -r /tmp/mirte-frame-stl.zip ./stl/*
+          zip -r /tmp/mirte-frame-dxf.zip ./dxf/*
+          zip -r /tmp/mirte-frame-step.zip ./step/*
+      - name: Push to release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+            files: |
+              /tmp/mirte-frame-dxf.zip
+              /tmp/mirte-frame-stl.zip
+              /tmp/mirte-frame-step.zip
