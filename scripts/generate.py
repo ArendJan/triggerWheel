@@ -12,6 +12,8 @@ try:
     import Draft
     import Part
     import Mesh
+    # import importSVG
+
 except ValueError:
     print("FreeCAD library not found.")
     exit()
@@ -49,7 +51,6 @@ def exportSTL(body, name, build_path):
         Mesh.export(__objs__, pathOut)
 
     del __objs__
-    
     
 def exportSTEP(body, name, build_path):
     pathOut = getFilePath(body, name, build_path, "step")
@@ -115,15 +116,19 @@ def renderFile(freecadFile):
     for obj in doc.Objects:
         print(f"Found object: {obj.Name} of type {obj.TypeId}")
         # Fix for motor clamp lock, the chamfer one is the final one
-        if obj.isDerivedFrom("PartDesign::Body") or obj.isDerivedFrom("Part::Chamfer") or obj.isDerivedFrom("Part::Fillet") or obj.Name.startswith("Array"):
-            bodies.append(obj)
+        # if obj.isDerivedFrom("PartDesign::Body") or obj.isDerivedFrom("Part::Chamfer") or obj.isDerivedFrom("Part::Fillet") or obj.Name.startswith("Array") :
+        bodies.append(obj)
     for body in bodies:
-        build_dir = (freecadFile.parent / "../build").resolve()
-        if not build_dir.exists():
-           os.mkdir(build_dir)
-        exportDXF(body, freecadFile.stem, build_dir)
-        exportSTL(body, freecadFile.stem, build_dir)
-        exportSTEP(body, freecadFile.stem, build_dir)
+        try:
+            print(f"Processing body: {body.Name} of type {body.TypeId}")
+            build_dir = (freecadFile.parent / "../build").resolve()
+            if not build_dir.exists():
+                os.mkdir(build_dir)
+            exportDXF(body, freecadFile.stem, build_dir)
+            exportSTL(body, freecadFile.stem, build_dir)
+            exportSTEP(body, freecadFile.stem, build_dir)
+        except Exception as e:
+            print(f"Error processing body {body.Name}: {e}")
     FreeCAD.closeDocument(freecadFile.stem)
 
 
