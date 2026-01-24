@@ -1,7 +1,7 @@
 #!/usr/local/bin/python3
 
 rel_freecad_directory = "../"
-
+document_name = "triggerwheel"
 import sys
 
 sys.path.append("/usr/lib/freecad-python3/lib/")
@@ -68,10 +68,12 @@ def exportSTEP(body, name, build_path):
     
     
 def exportDXF(body, name, build_path):   
+    FreeCAD.getDocument(name).recompute()    
+
     __objs__ = []
     pathOut = getFilePath(body, name, build_path, "dxf")
 
-    __objs__.append(FreeCAD.getDocument("triggerwheel").getObject("PolarPattern"))
+    __objs__.append(FreeCAD.getDocument(document_name).getObject(body.Name))
     import importDXF
     if hasattr(importDXF, "exportOptions"):
         options = importDXF.exportOptions(pathOut)
@@ -81,7 +83,6 @@ def exportDXF(body, name, build_path):
     
     del __objs__
     # sv0 = Draft.make_shape2dview(body, FreeCAD.Vector(0, 0, 1))
-    # FreeCAD.getDocument(name).recompute()    
     
     # # Code as shown in FreeCAD console when generating dxf file:
     # __objs__ = []
@@ -125,10 +126,15 @@ def renderFile(freecadFile):
     doc.recompute()
     bodies = list()
     for obj in doc.Objects:
-        print(f"Found object: {obj.Name} of type {obj.TypeId}")
-        # Fix for motor clamp lock, the chamfer one is the final one
-        # if obj.isDerivedFrom("PartDesign::Body") or obj.isDerivedFrom("Part::Chamfer") or obj.isDerivedFrom("Part::Fillet") or obj.Name.startswith("Array") :
-        bodies.append(obj)
+        # if obj.isDerivedFrom("PartDesign::Body"):
+        if obj.Name.startswith("PolarPatte"):
+            bodies.append(obj)
+    # bodies.append()
+    # for obj in doc.Objects:
+    #     print(f"Found object: {obj.Name} of type {obj.TypeId}")
+    #     # Fix for motor clamp lock, the chamfer one is the final one
+    #     # if obj.isDerivedFrom("PartDesign::Body") or obj.isDerivedFrom("Part::Chamfer") or obj.isDerivedFrom("Part::Fillet") or obj.Name.startswith("Array") :
+    #     bodies.append(obj)
     for body in bodies:
         try:
             print(f"Processing body: {body.Name} of type {body.TypeId}")
