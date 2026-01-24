@@ -68,21 +68,32 @@ def exportSTEP(body, name, build_path):
     
     
 def exportDXF(body, name, build_path):   
-    sv0 = Draft.make_shape2dview(body, FreeCAD.Vector(0, 0, 1))
-    FreeCAD.getDocument(name).recompute()    
-    pathOut = getFilePath(body, name, build_path, "dxf")
-    
-    # Code as shown in FreeCAD console when generating dxf file:
     __objs__ = []
-    __objs__.append(FreeCAD.getDocument(name).getObject(sv0.Name))
+    pathOut = getFilePath(body, name, build_path, "dxf")
 
+    __objs__.append(FreeCAD.getDocument("triggerwheel").getObject("PolarPattern"))
+    import importDXF
     if hasattr(importDXF, "exportOptions"):
         options = importDXF.exportOptions(pathOut)
         importDXF.export(__objs__, pathOut, options)
     else:
-        d = importDXF.export(__objs__, pathOut)
-
+        importDXF.export(__objs__, pathOut)
+    
     del __objs__
+    # sv0 = Draft.make_shape2dview(body, FreeCAD.Vector(0, 0, 1))
+    # FreeCAD.getDocument(name).recompute()    
+    
+    # # Code as shown in FreeCAD console when generating dxf file:
+    # __objs__ = []
+    # __objs__.append(FreeCAD.getDocument(name).getObject(sv0.Name))
+
+    # if hasattr(importDXF, "exportOptions"):
+    #     options = importDXF.exportOptions(pathOut)
+    #     importDXF.export(__objs__, pathOut, options)
+    # else:
+    #     d = importDXF.export(__objs__, pathOut)
+
+    # del __objs__
     
 tooth_count_spreadsheet_cell = "E2"
 missing_count_spreadsheet_cell = "F2"
