@@ -46,25 +46,25 @@ on:
       slit_width:
         description: 'Slit width'
         required: false
-        default: '1'
+        default: '10'
         type: string
       slit_depth:   
-        description: 'Slit depth'
+        description: 'Slit length'
         required: false
-        default: '2'
+        default: '40'
         type: string
       slit_count:
         description: 'Slit count'
         required: false
-        default: '36'
+        default: '10'
         type: string
       slit_offset:
-        description: 'Slit offset'
+        description: 'Slit offset from center'
         required: false
-        default: '0'
+        default: '50'
         type: string
   workflow_call:
-    inputs:
+     inputs:
       tooth:
         description: 'Tooth count'
         required: true
@@ -108,22 +108,22 @@ on:
       slit_width:
         description: 'Slit width'
         required: false
-        default: '1'
+        default: '10'
         type: string
       slit_depth:   
-        description: 'Slit depth'
+        description: 'Slit length'
         required: false
-        default: '2'
+        default: '40'
         type: string
       slit_count:
         description: 'Slit count'
         required: false
-        default: '36'
+        default: '10'
         type: string
       slit_offset:
-        description: 'Slit offset'
+        description: 'Slit offset from center'
         required: false
-        default: '0'
+        default: '50'
         type: string
 
 jobs:
