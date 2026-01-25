@@ -1,0 +1,224 @@
+name: dxf export workflow
+
+on:
+  workflow_dispatch:
+     inputs:
+      tooth:
+        description: 'Tooth count'
+        required: true
+        default: '36'
+        type: string
+      missing:
+        description: 'Missing count'
+        required: true
+        default: '1'
+        type: string
+      tooth_length:
+        description: 'Tooth length'
+        required: false
+        default: '5'
+        type: string
+      tooth_duty_cycle:
+        description: 'Tooth duty cycle'
+        required: false
+        type: string
+        default: '50'
+      tooth_radius:
+        description: 'Tooth radius'
+        required: false
+        default: '1'
+        type: string
+      diameter:
+        description: 'Diameter'
+        required: false
+        default: '200'
+        type: string
+      thickness:
+        description: 'Thickness'
+        required: false
+        default: '10'
+        type: string
+      hole_diameter:
+        description: 'Hole diameter'
+        required: false
+        type: string
+        default: '5'
+      slit_width:
+        description: 'Slit width'
+        required: false
+        default: '1'
+        type: string
+      slit_depth:   
+        description: 'Slit depth'
+        required: false
+        default: '2'
+        type: string
+      slit_count:
+        description: 'Slit count'
+        required: false
+        default: '36'
+        type: string
+      slit_offset:
+        description: 'Slit offset'
+        required: false
+        default: '0'
+        type: string
+  workflow_call:
+    inputs:
+      tooth:
+        description: 'Tooth count'
+        required: true
+        default: '36'
+        type: string
+      missing:
+        description: 'Missing count'
+        required: true
+        default: '1'
+        type: string
+      tooth_length:
+        description: 'Tooth length'
+        required: false
+        default: '5'
+        type: string
+      tooth_duty_cycle:
+        description: 'Tooth duty cycle'
+        required: false
+        type: string
+        default: '50'
+      tooth_radius:
+        description: 'Tooth radius'
+        required: false
+        default: '1'
+        type: string
+      diameter:
+        description: 'Diameter'
+        required: false
+        default: '200'
+        type: string
+      thickness:
+        description: 'Thickness'
+        required: false
+        default: '10'
+        type: string
+      hole_diameter:
+        description: 'Hole diameter'
+        required: false
+        type: string
+        default: '5'
+      slit_width:
+        description: 'Slit width'
+        required: false
+        default: '1'
+        type: string
+      slit_depth:   
+        description: 'Slit depth'
+        required: false
+        default: '2'
+        type: string
+      slit_count:
+        description: 'Slit count'
+        required: false
+        default: '36'
+        type: string
+      slit_offset:
+        description: 'Slit offset'
+        required: false
+        default: '0'
+        type: string
+
+jobs:
+  dxf_wf:
+    runs-on: ubuntu-latest
+    container:
+      image: amrit3701/freecad-cli:1.0.2-amd64-ubuntu22.04-py3.11-qt5
+    # strategy:
+    #   matrix:
+    #     tooth: [
+    #       36,
+    #       10,
+    #       60
+    #     ]
+    #     missing: [1,2]
+    #     exclude:
+    #       - tooth: 36
+    #         missing: 2
+    #       - tooth: 10
+    #         missing: 2
+    #       - tooth: 60
+    #         missing: 1
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: install nodejs
+        run: |
+          apt update
+          apt install curl -y
+          curl -fsSL https://deb.nodesource.com/setup_24.x | bash -
+          apt-get install -y nodejs
+      - name: Run FreeCAD
+        run: |
+            # put all settings in a yaml file
+            cat <<EOF > /tmp/settings.yaml
+            tooth_count: ${{ inputs.tooth }}
+            missing_count: ${{ inputs.missing }}
+            tooth_length: ${{ inputs.tooth_length || 5 }}
+            tooth_duty_cycle: ${{ inputs.tooth_duty_cycle || 50 }}
+            tooth_radius: ${{ inputs.tooth_radius || 1 }}
+            diameter: ${{ inputs.diameter || 200 }}
+            thickness: ${{ inputs.thickness || 10 }}
+            hole_diameter: ${{ inputs.hole_diameter || 5 }}
+            slit_width: ${{ inputs.slit_width || 1 }}
+            slit_depth: ${{ inputs.slit_depth || 2 }}
+            slit_count: ${{ inputs.slit_count || 36 }}
+            slit_offset: ${{ inputs.slit_offset || 0 }}
+            EOF
+            echo "Settings:"
+            cat /tmp/settings.yaml
+            mkdir /tmp/mirte-frame
+            cp -r ./ /tmp/mirte-frame
+            cp -r ./scripts /tmp/mirte-frame
+            cd /tmp/mirte-frame/scripts
+            pip install pyyaml
+            echo "exec(open(\"/tmp/mirte-frame/scripts/generate.py\").read())" | FreeCADCmd
+      # - name: Upload DXF
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: dxfs_${{ matrix.tooth }}_missing_${{ matrix.missing }}
+      #     path: /tmp/build/dxf/*
+      # - name: Upload STL
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: stls_${{ matrix.tooth }}_missing_${{ matrix.missing }}
+      #     path: /tmp/build/stl/*
+      # - name: Upload STEP
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: steps_${{ matrix.tooth }}_missing_${{ matrix.missing }}
+      #     path: /tmp/build/step/*
+      - name: zip files
+        # if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          cd /tmp/build
+          mkdir /tmp/artifacts
+          ls
+          # zip -r /tmp/mirte-frame-stl.zip ./stl/*
+          # zip -r /tmp/mirte-frame-dxf.zip ./dxf/*
+          # zip -r /tmp/mirte-frame-step.zip ./step/*
+          cp ./stl/* /tmp/artifacts/ || true
+          cp ./dxf/* /tmp/artifacts/ || true
+          cp ./step/* /tmp/artifacts/ || true
+          cd /tmp/artifacts
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.tooth }}_missing_${{ inputs.missing }}
+          path: /tmp/artifacts/*
+
+      - name: Push to release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+            files: |
+              /tmp/mirte-frame-dxf.zip
+              /tmp/mirte-frame-stl.zip
+              /tmp/mirte-frame-step.zip

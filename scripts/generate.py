@@ -155,7 +155,9 @@ def set_settings(doc, freecadFile):
                 config = yaml.safe_load(f)
                 for key, value in config.items():
                     if key in settings_map:
+                        print(f"Setting {key} to {value} in spreadsheet cell {settings_map[key]}")
                         sheet.set(settings_map[key], str(value))
+                        print(f"Set {key} to {value} in spreadsheet cell {settings_map[key]}, {sheet.get(settings_map[key])}")
     except Exception as e:
         print(f"Error setting spreadsheet value: {e}")
     doc.recompute()

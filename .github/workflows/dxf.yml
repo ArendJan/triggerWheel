@@ -5,9 +5,6 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    container:
-      image: amrit3701/freecad-cli:1.0.2-amd64-ubuntu22.04-py3.11-qt5
     strategy:
       matrix:
         tooth: [
@@ -23,96 +20,19 @@ jobs:
             missing: 2
           - tooth: 60
             missing: 1
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      # - name: install nodejs
-      #   run: |
-      #     apt update
-      #     apt install curl -y
-      #     curl -fsSL https://deb.nodesource.com/setup_24.x | bash -
-      #     apt-get install -y nodejs
-      # - name: install freecad
-      #   run: |
-      #     # sudo add-apt-repository ppa:freecad-maintainers/freecad-stable -y
-      #     sudo apt-get update
-      #     # sudo apt-get install freecad -y
-      #     sudo apt install flatpak -y
-      #     flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-      #     flatpak install flathub org.freecad.FreeCAD -y
-
-      #     # service snapd start
-      #     # sudo snap install freecad
-      - name: install nodejs
-        run: |
-          apt update
-          apt install curl -y
-          curl -fsSL https://deb.nodesource.com/setup_24.x | bash -
-          apt-get install -y nodejs
-      - name: Run FreeCAD
-        run: |
-            # put all settings in a yaml file
-            cat <<EOF > /tmp/settings.yaml
-            tooth_count: ${{ matrix.tooth }}
-            missing_count: ${{ matrix.missing }}
-            tooth_length: ${{ matrix.tooth_length || 5 }}
-            tooth_duty_cycle: ${{ matrix.tooth_duty_cycle || 50 }}
-            tooth_radius: ${{ matrix.tooth_radius || 1 }}
-            diameter: ${{ matrix.diameter || 200 }}
-            thickness: ${{ matrix.thickness || 10 }}
-            hole_diameter: ${{ matrix.hole_diameter || 5 }}
-            slit_width: ${{ matrix.slit_width || 1 }}
-            slit_depth: ${{ matrix.slit_depth || 2 }}
-            slit_count: ${{ matrix.slit_count || 36 }}
-            slit_offset: ${{ matrix.slit_offset || 0 }}
-            EOF
-            echo "Settings:"
-            cat /tmp/settings.yaml
-            mkdir /tmp/mirte-frame
-            cp -r ./ /tmp/mirte-frame
-            cp -r ./scripts /tmp/mirte-frame
-            cd /tmp/mirte-frame/scripts
-            pip install pyyaml
-            echo "exec(open(\"/tmp/mirte-frame/scripts/generate.py\").read())" | FreeCADCmd
-      # - name: Upload DXF
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: dxfs_${{ matrix.tooth }}_missing_${{ matrix.missing }}
-      #     path: /tmp/build/dxf/*
-      # - name: Upload STL
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: stls_${{ matrix.tooth }}_missing_${{ matrix.missing }}
-      #     path: /tmp/build/stl/*
-      # - name: Upload STEP
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: steps_${{ matrix.tooth }}_missing_${{ matrix.missing }}
-      #     path: /tmp/build/step/*
-      - name: zip files
-        # if: startsWith(github.ref, 'refs/tags/')
-        run: |
-          cd /tmp/build
-          mkdir /tmp/artifacts
-          ls
-          # zip -r /tmp/mirte-frame-stl.zip ./stl/*
-          # zip -r /tmp/mirte-frame-dxf.zip ./dxf/*
-          # zip -r /tmp/mirte-frame-step.zip ./step/*
-          cp ./stl/* /tmp/artifacts/ || true
-          cp ./dxf/* /tmp/artifacts/ || true
-          cp ./step/* /tmp/artifacts/ || true
-          cd /tmp/artifacts
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.tooth }}_missing_${{ matrix.missing }}
-          path: /tmp/artifacts/*
-
-      - name: Push to release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-            files: |
-              /tmp/mirte-frame-dxf.zip
-              /tmp/mirte-frame-stl.zip
-              /tmp/mirte-frame-step.zip
+      # fast-fail: false
+    
+    uses: ./.github/workflows/dxf_wf.yml
+    with:
+      tooth: ${{ matrix.tooth }}
+      missing: ${{ matrix.missing }}
+      tooth_length: 10
+      tooth_duty_cycle: 50
+      tooth_radius: 1
+      diameter: 180
+      thickness: 5
+      hole_diameter: 14
+      slit_width: 10
+      slit_depth: 40
+      slit_count: 10
+      slit_offset: 50
