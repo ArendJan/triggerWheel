@@ -51,16 +51,28 @@ jobs:
           apt-get install -y nodejs
       - name: Run FreeCAD
         run: |
+            # put all settings in a yaml file
+            cat <<EOF > /tmp/settings.yaml
+            tooth_count: ${{ matrix.tooth }}
+            missing_count: ${{ matrix.missing }}
+            tooth_length: ${{ matrix.tooth_length || 5 }}
+            tooth_duty_cycle: ${{ matrix.tooth_duty_cycle || 50 }}
+            tooth_radius: ${{ matrix.tooth_radius || 1 }}
+            diameter: ${{ matrix.diameter || 200 }}
+            thickness: ${{ matrix.thickness || 10 }}
+            hole_diameter: ${{ matrix.hole_diameter || 5 }}
+            slit_width: ${{ matrix.slit_width || 1 }}
+            slit_depth: ${{ matrix.slit_depth || 2 }}
+            slit_count: ${{ matrix.slit_count || 36 }}
+            slit_offset: ${{ matrix.slit_offset || 0 }}
+            EOF
+            echo "Settings:"
+            cat /tmp/settings.yaml
             mkdir /tmp/mirte-frame
             cp -r ./ /tmp/mirte-frame
             cp -r ./scripts /tmp/mirte-frame
-            echo "${{
-              matrix.tooth
-            }}" > /tmp/mirte-frame/TOOTH_COUNT.txt
-            echo "${{
-              matrix.missing
-            }}" > /tmp/mirte-frame/MISSING_COUNT.txt
             cd /tmp/mirte-frame/scripts
+            pip install pyyaml
             echo "exec(open(\"/tmp/mirte-frame/scripts/generate.py\").read())" | FreeCADCmd
       # - name: Upload DXF
       #   uses: actions/upload-artifact@v4

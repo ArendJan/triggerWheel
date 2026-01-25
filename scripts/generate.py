@@ -3,7 +3,7 @@
 rel_freecad_directory = "../"
 document_name = "triggerwheel"
 import sys
-
+import yaml
 sys.path.append("/usr/lib/freecad-python3/lib/")
 sys.path.append("/")
 try:
@@ -98,9 +98,37 @@ def exportDXF(body, name, build_path):
     
 tooth_count_spreadsheet_cell = "E2"
 missing_count_spreadsheet_cell = "F2"
-    
-def renderFile(freecadFile):
-    doc = FreeCAD.open(str(freecadFile))
+
+# tooth_count: ${{ matrix.tooth }}
+# missing_count: ${{ matrix.missing }}
+# tooth_length: ${{ matrix.tooth_length || 5 }}
+# tooth_duty_cycle: ${{ matrix.tooth_duty_cycle || 50 }}
+# tooth_radius: ${{ matrix.tooth_radius || 0 }}
+# diameter: ${{ matrix.diameter || 200 }}
+# thickness: ${{ matrix.thickness || 10 }}
+# hole_diameter: ${{ matrix.hole_diameter || 5 }}
+# slit_width: ${{ matrix.slit_width || 1 }}
+# slit_depth: ${{ matrix.slit_depth || 2 }}
+# slit_count: ${{ matrix.slit_count || 36 }}
+# slit_offset: ${{ matrix.slit_offset || 0 }}
+
+
+settings_map = {
+    "tooth_count": "E2",
+    "missing_count": "F2",
+    "tooth_length": "D2",
+    "tooth_duty_cycle": "I2",
+    "tooth_radius": "G2",
+    "thickness": "H2",
+    "diameter": "B2",
+    "hole_diameter": "C2",
+    "slit_width": "C14",
+    "slit_depth": "B14",
+    "slit_count": "D14",
+    "slit_offset": "E14",
+}
+
+def set_settings(doc, freecadFile):
     SPREADSHEET_NAME = "Spreadsheet"
     try:
         sheet = doc.getObject(SPREADSHEET_NAME)
@@ -110,20 +138,33 @@ def renderFile(freecadFile):
         print(f"Spreadsheet {SPREADSHEET_NAME} not found in {freecadFile.stem}")
         pass
     try:
-        tooth_count_file = freecadFile.parent / "TOOTH_COUNT.txt"
-        if tooth_count_file.exists():
-            with open(tooth_count_file, 'r') as f:
-                tooth_count = f.read().strip()
-                sheet.set(tooth_count_spreadsheet_cell, tooth_count)
+        # tooth_count_file = freecadFile.parent / "TOOTH_COUNT.txt"
+        # if tooth_count_file.exists():
+        #     with open(tooth_count_file, 'r') as f:
+        #         tooth_count = f.read().strip()
+        #         sheet.set(tooth_count_spreadsheet_cell, tooth_count)
         
-        missing_count_file = freecadFile.parent / "MISSING_COUNT.txt"
-        if missing_count_file.exists():
-            with open(missing_count_file, 'r') as f:
-                missing_count = f.read().strip()
-                sheet.set(missing_count_spreadsheet_cell, missing_count)
+        # missing_count_file = freecadFile.parent / "MISSING_COUNT.txt"
+        # if missing_count_file.exists():
+        #     with open(missing_count_file, 'r') as f:
+        #         missing_count = f.read().strip()
+        #         sheet.set(missing_count_spreadsheet_cell, missing_count)
+        config_file = "/tmp/settings.yaml"
+        if os.path.exists(config_file):
+            with open(config_file, 'r') as f:
+                config = yaml.safe_load(f)
+                for key, value in config.items():
+                    if key in settings_map:
+                        sheet.set(settings_map[key], str(value))
     except Exception as e:
         print(f"Error setting spreadsheet value: {e}")
     doc.recompute()
+
+
+
+def renderFile(freecadFile):
+    doc = FreeCAD.open(str(freecadFile))
+    set_settings(doc, freecadFile)
     bodies = list()
     for obj in doc.Objects:
         # if obj.isDerivedFrom("PartDesign::Body"):
