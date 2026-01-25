@@ -20,6 +20,7 @@ jobs:
             missing: 2
           - tooth: 60
             missing: 1
+      # fast-fail: false
     
     uses: ./.github/workflows/dxf_wf.yml
     with:
@@ -27,11 +28,11 @@ jobs:
       missing: ${{ matrix.missing }}
       tooth_length: 10
       tooth_duty_cycle: 50
-      tooth_radius: 5
-      diameter: 100
+      tooth_radius: 1
+      diameter: 180
       thickness: 5
-      hole_diameter: 20
-      slit_width: 2
-      slit_depth: 5
+      hole_diameter: 14
+      slit_width: 10
+      slit_depth: 40
       slit_count: 10
-      slit_offset: 0
+      slit_offset: 50

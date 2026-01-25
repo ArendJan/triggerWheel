@@ -1,4 +1,4 @@
-name: dxf workflow reusable
+name: dxf export workflow
 
 on:
   workflow_dispatch:
