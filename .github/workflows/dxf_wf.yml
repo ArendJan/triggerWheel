@@ -175,7 +175,7 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.tooth }}_missing_${{ matrix.missing }}
+          name: ${{ github.event.inputs.tooth }}_missing_${{ github.event.inputs.missing }}
           path: /tmp/artifacts/*
 
       - name: Push to release
