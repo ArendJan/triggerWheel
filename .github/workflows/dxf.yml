@@ -6,17 +6,14 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # container:
-    #   image: amrit3701/freecad-cli:latest
-    # vars:
-    #   TOOTH_COUNT: 36, 10
-    #   MISSING_COUNT: { 1 }
+    container:
+      image: amrit3701/freecad-cli:1.0.2-amd64-ubuntu22.04-py3.11-qt5
     strategy:
       matrix:
         tooth: [
-          # 36,
+          36,
           10,
-          # 60
+          60
         ]
         missing: [1,2]
         exclude:
@@ -35,12 +32,23 @@ jobs:
       #     apt install curl -y
       #     curl -fsSL https://deb.nodesource.com/setup_24.x | bash -
       #     apt-get install -y nodejs
-      - name: install freecad
+      # - name: install freecad
+      #   run: |
+      #     # sudo add-apt-repository ppa:freecad-maintainers/freecad-stable -y
+      #     sudo apt-get update
+      #     # sudo apt-get install freecad -y
+      #     sudo apt install flatpak -y
+      #     flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+      #     flatpak install flathub org.freecad.FreeCAD -y
+
+      #     # service snapd start
+      #     # sudo snap install freecad
+      - name: install nodejs
         run: |
-          sudo add-apt-repository ppa:freecad-maintainers/freecad-stable -y
-          sudo apt-get update
-          sudo apt-get install freecad -y
-    
+          apt update
+          apt install curl -y
+          curl -fsSL https://deb.nodesource.com/setup_24.x | bash -
+          apt-get install -y nodejs
       - name: Run FreeCAD
         run: |
             mkdir /tmp/mirte-frame
@@ -53,7 +61,7 @@ jobs:
               matrix.missing
             }}" > /tmp/mirte-frame/MISSING_COUNT.txt
             cd /tmp/mirte-frame/scripts
-            echo "exec(open(\"/tmp/mirte-frame/scripts/generate.py\").read())" | freecadcmd
+            echo "exec(open(\"/tmp/mirte-frame/scripts/generate.py\").read())" | FreeCADCmd
       # - name: Upload DXF
       #   uses: actions/upload-artifact@v4
       #   with:
@@ -74,6 +82,7 @@ jobs:
         run: |
           cd /tmp/build
           mkdir /tmp/artifacts
+          ls
           # zip -r /tmp/mirte-frame-stl.zip ./stl/*
           # zip -r /tmp/mirte-frame-dxf.zip ./dxf/*
           # zip -r /tmp/mirte-frame-step.zip ./step/*
