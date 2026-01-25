@@ -7,87 +7,123 @@ on:
         description: 'Tooth count'
         required: true
         default: '36'
+        type: string
       missing:
         description: 'Missing count'
         required: true
         default: '1'
+        type: string
       tooth_length:
         description: 'Tooth length'
         required: false
         default: '5'
+        type: string
       tooth_duty_cycle:
         description: 'Tooth duty cycle'
         required: false
+        type: string
         default: '50'
       tooth_radius:
         description: 'Tooth radius'
         required: false
         default: '1'
+        type: string
       diameter:
         description: 'Diameter'
         required: false
         default: '200'
+        type: string
       thickness:
         description: 'Thickness'
         required: false
         default: '10'
+        type: string
       hole_diameter:
         description: 'Hole diameter'
         required: false
+        type: string
         default: '5'
       slit_width:
         description: 'Slit width'
         required: false
         default: '1'
+        type: string
       slit_depth:   
         description: 'Slit depth'
         required: false
         default: '2'
+        type: string
       slit_count:
         description: 'Slit count'
         required: false
         default: '36'
+        type: string
       slit_offset:
         description: 'Slit offset'
         required: false
         default: '0'
+        type: string
   workflow_call:
     inputs:
       tooth:
+        description: 'Tooth count'
         required: true
+        default: '36'
         type: string
       missing:
+        description: 'Missing count'
         required: true
+        default: '1'
         type: string
       tooth_length:
+        description: 'Tooth length'
         required: false
+        default: '5'
         type: string
       tooth_duty_cycle:
+        description: 'Tooth duty cycle'
         required: false
         type: string
+        default: '50'
       tooth_radius:
+        description: 'Tooth radius'
         required: false
+        default: '1'
         type: string
       diameter:
+        description: 'Diameter'
         required: false
+        default: '200'
         type: string
       thickness:
+        description: 'Thickness'
         required: false
+        default: '10'
         type: string
       hole_diameter:
+        description: 'Hole diameter'
         required: false
         type: string
+        default: '5'
       slit_width:
+        description: 'Slit width'
         required: false
+        default: '1'
         type: string
-      slit_depth:
+      slit_depth:   
+        description: 'Slit depth'
         required: false
+        default: '2'
         type: string
       slit_count:
+        description: 'Slit count'
         required: false
+        default: '36'
         type: string
       slit_offset:
+        description: 'Slit offset'
         required: false
+        default: '0'
         type: string
 
 jobs:
@@ -123,18 +159,18 @@ jobs:
         run: |
             # put all settings in a yaml file
             cat <<EOF > /tmp/settings.yaml
-            tooth_count: ${{ github.event.inputs.tooth }}
-            missing_count: ${{ github.event.inputs.missing }}
-            tooth_length: ${{ github.event.inputs.tooth_length || 5 }}
-            tooth_duty_cycle: ${{ github.event.inputs.tooth_duty_cycle || 50 }}
-            tooth_radius: ${{ github.event.inputs.tooth_radius || 1 }}
-            diameter: ${{ github.event.inputs.diameter || 200 }}
-            thickness: ${{ github.event.inputs.thickness || 10 }}
-            hole_diameter: ${{ github.event.inputs.hole_diameter || 5 }}
-            slit_width: ${{ github.event.inputs.slit_width || 1 }}
-            slit_depth: ${{ github.event.inputs.slit_depth || 2 }}
-            slit_count: ${{ github.event.inputs.slit_count || 36 }}
-            slit_offset: ${{ github.event.inputs.slit_offset || 0 }}
+            tooth_count: ${{ inputs.tooth }}
+            missing_count: ${{ inputs.missing }}
+            tooth_length: ${{ inputs.tooth_length || 5 }}
+            tooth_duty_cycle: ${{ inputs.tooth_duty_cycle || 50 }}
+            tooth_radius: ${{ inputs.tooth_radius || 1 }}
+            diameter: ${{ inputs.diameter || 200 }}
+            thickness: ${{ inputs.thickness || 10 }}
+            hole_diameter: ${{ inputs.hole_diameter || 5 }}
+            slit_width: ${{ inputs.slit_width || 1 }}
+            slit_depth: ${{ inputs.slit_depth || 2 }}
+            slit_count: ${{ inputs.slit_count || 36 }}
+            slit_offset: ${{ inputs.slit_offset || 0 }}
             EOF
             echo "Settings:"
             cat /tmp/settings.yaml
@@ -175,7 +211,7 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.event.inputs.tooth }}_missing_${{ github.event.inputs.missing }}
+          name: ${{ inputs.tooth }}_missing_${{ inputs.missing }}
           path: /tmp/artifacts/*
 
       - name: Push to release
