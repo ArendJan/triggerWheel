@@ -5,9 +5,6 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    container:
-      image: amrit3701/freecad-cli:1.0.2-amd64-ubuntu22.04-py3.11-qt5
     strategy:
       matrix:
         tooth: [
@@ -23,18 +20,18 @@ jobs:
             missing: 2
           - tooth: 60
             missing: 1
-    steps:
-      - uses: ./.github/workflows/dxf_wf.yml
-        with:
-          tooth: ${{ matrix.tooth }}
-          missing: ${{ matrix.missing }}
-          tooth_length: 10
-          tooth_duty_cycle: 50
-          tooth_radius: 5
-          diameter: 100
-          thickness: 5
-          hole_diameter: 20
-          slit_width: 2
-          slit_depth: 5
-          slit_count: 10
-          slit_offset: 0
+    
+    uses: ./.github/workflows/dxf_wf.yml
+    with:
+      tooth: ${{ matrix.tooth }}
+      missing: ${{ matrix.missing }}
+      tooth_length: 10
+      tooth_duty_cycle: 50
+      tooth_radius: 5
+      diameter: 100
+      thickness: 5
+      hole_diameter: 20
+      slit_width: 2
+      slit_depth: 5
+      slit_count: 10
+      slit_offset: 0
