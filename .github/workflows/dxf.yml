@@ -29,10 +29,10 @@ jobs:
       tooth_length: 10
       tooth_duty_cycle: 50
       tooth_radius: 1
-      diameter: 180
+      diameter: 145
       thickness: 5
-      hole_diameter: 14
+      hole_diameter: 14.14
       slit_width: 10
-      slit_depth: 40
+      slit_depth: 25
       slit_count: 10
-      slit_offset: 50
+      slit_offset: 40
